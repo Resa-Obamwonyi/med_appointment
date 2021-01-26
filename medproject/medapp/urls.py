@@ -1,6 +1,6 @@
 from django.urls import path
-# from .views import Availability
-#
-# urlpatterns = [
-#     path('calender', Availability.as_view(), name='set_availability'),
-# ]
+from .views import Availability, Login
+
+urlpatterns = [
+    path('login', Login.as_view(), name='login'),
+]

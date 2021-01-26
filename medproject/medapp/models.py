@@ -11,6 +11,7 @@ class Doctor(models.Model):
     last_name = models.CharField(max_length=100, null=False)
     email = models.CharField(max_length=100, null=False)
     phone_number = models.CharField(max_length=100, null=False)
+    password = models.CharField(max_length=255)
     department = models.CharField(max_length=100, null=False)
     created_at = models.DateTimeField(auto_now=False, default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
@@ -22,6 +23,7 @@ class Patient(models.Model):
     last_name = models.CharField(max_length=100, null=False)
     email = models.CharField(max_length=100, null=False)
     phone_number = models.CharField(max_length=100, null=False)
+    password = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now=False, default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
 
