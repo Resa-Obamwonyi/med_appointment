@@ -83,7 +83,7 @@ WSGI_APPLICATION = 'config.settings.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
-print(DEBUG)
+
 if DEBUG is False:
     DATABASES = {'default': dj_database_url.config(conn_max_age=60)}
 else:
