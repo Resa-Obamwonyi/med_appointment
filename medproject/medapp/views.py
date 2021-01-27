@@ -87,7 +87,7 @@ class Calender(APIView):
                     dict(calender_serializer.errors),
                     status=status.HTTP_400_BAD_REQUEST)
 
-            return Response(dict(message="Calender Availability is set"))
+            return Response(dict(message="Calender Availability is set"), status=status.HTTP_201_CREATED)
 
         except Exception:
             return Response(
