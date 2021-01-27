@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .models import Doctor, Patient, Availability, Appointment
-from .serializers import AvailabilitySerializer
+from .serializers import AvailabilitySerializer, AppointmentSerializer
 
 
 # Login View
@@ -58,6 +58,7 @@ class Login(APIView):
                 status=status.HTTP_400_BAD_REQUEST)
 
 
+# Set Calender Availability View
 class Calender(APIView):
     permission_classes = [AllowAny]
 
@@ -91,4 +92,96 @@ class Calender(APIView):
         except Exception:
             return Response(
                 dict(invalid_credential='Sorry, You are not a Doctor.'),
+                status=status.HTTP_400_BAD_REQUEST)
+
+
+class BookAppointment(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+
+        patient_email = strip_and_lower(request.data.get('email', ''))
+        doctor_email = strip_and_lower(request.data.get('doctor_email', ''))
+        day = str.capitalize(request.data.get('day', ''))
+        start_time = convert(request.data.get('start_time', '').split(":"))
+        end_time = convert(request.data.get('stop_time', '').split(":"))
+
+        try:
+            patient = Patient.objects.get(email=patient_email)
+            patient_id = patient.id
+
+            try:
+                doctor_id = Doctor.objects.get(email=doctor_email).id
+
+            except Exception:
+                return Response(dict(message="The Doctor you have selected does not exist."))
+
+            # Validate selected time with Doctor's availability.
+            doctor_availability = Availability.objects.get(doctor_id=doctor_id, day=day)
+
+            if doctor_availability.start_time <= start_time or doctor_availability.end_time >= end_time:
+
+                # check if the time has been booked by another patient
+                try:
+
+                    appointments_day = Appointment.objects.filter(day=day)
+                    for value in appointments_day:
+
+                        if value.start_time == start_time and value.end_time == end_time:
+                            return Response(dict(message="The time slot you have selected has already been booked."))
+
+                        if value.start_time <= start_time <= value.end_time:
+                            return Response(dict(message="The time slot you have selected has already been booked."))
+
+                        if value.start_time <= end_time <= value.end_time:
+                            return Response(dict(message="The time slot you have selected has already been booked."))
+
+                        if start_time <= value.start_time and end_time >= value.end_time:
+                            return Response(dict(message="The time slot you have selected has already been booked."))
+
+                    appointment_data = {
+                        "patient_id": patient_id,
+                        "doctor_id": doctor_id,
+                        "day": day,
+                        "start_time": start_time,
+                        "end_time": end_time
+                    }
+
+                    appointment_serializer = AppointmentSerializer(data=appointment_data)
+
+                    if appointment_serializer.is_valid():
+                        appointment_serializer.save()
+                    else:
+                        return Response(
+                            dict(appointment_serializer.errors),
+                            status=status.HTTP_400_BAD_REQUEST)
+                    return Response(dict(message="Appointment has been Booked successfully"))
+
+                except Exception:
+
+                    appointment_data = {
+                        "patient_id": patient_id,
+                        "doctor_id": doctor_id,
+                        "day": day,
+                        "start_time": start_time,
+                        "end_time": end_time
+                    }
+
+                    appointment_serializer = AppointmentSerializer(data=appointment_data)
+
+                    if appointment_serializer.is_valid():
+                        appointment_serializer.save()
+                    else:
+                        return Response(
+                            dict(appointment_serializer.errors),
+                            status=status.HTTP_400_BAD_REQUEST)
+                    return Response(dict(message="Appointment has been Booked successfully"))
+
+            return Response(
+                dict(invalid_credential='Sorry, The Doctor you have selected is not available at this time.'),
+                status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception:
+            return Response(
+                dict(invalid_credential='Sorry, You are not a Registered Patient.'),
                 status=status.HTTP_400_BAD_REQUEST)
