@@ -119,6 +119,11 @@ class BookAppointment(APIView):
             # Validate selected time with Doctor's availability.
             doctor_availability = Availability.objects.get(doctor_id=doctor_id, day=day)
 
+            if start_time < doctor_availability.start_time or end_time > doctor_availability.end_time:
+                return Response(dict(
+                    invalid_credential='Sorry, The Doctor you have selected is not available at this time.'),
+                    status=status.HTTP_400_BAD_REQUEST)
+
             if doctor_availability.start_time <= start_time or doctor_availability.end_time >= end_time:
 
                 # check if the time has been booked by another patient
