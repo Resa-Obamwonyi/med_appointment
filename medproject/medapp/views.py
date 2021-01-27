@@ -160,7 +160,8 @@ class BookAppointment(APIView):
                         return Response(
                             dict(appointment_serializer.errors),
                             status=status.HTTP_400_BAD_REQUEST)
-                    return Response(dict(message="Appointment has been Booked successfully"))
+                    return Response(dict(message="Appointment has been Booked successfully"),
+                                    status=status.HTTP_201_CREATED)
 
                 except Exception:
 
@@ -180,7 +181,8 @@ class BookAppointment(APIView):
                         return Response(
                             dict(appointment_serializer.errors),
                             status=status.HTTP_400_BAD_REQUEST)
-                    return Response(dict(message="Appointment has been Booked successfully"))
+                    return Response(dict(message="Appointment has been Booked successfully"),
+                                    status=status.HTTP_201_CREATED)
 
             return Response(
                 dict(invalid_credential='Sorry, The Doctor you have selected is not available at this time.'),
